@@ -161,8 +161,8 @@ function TicketDetailDialog({ id, onClose }: { id: string; onClose: () => void }
           <div className="grid grid-cols-2 gap-3 text-sm">
             <Row label="Customer" value={ticket.customers?.full_name ?? "—"} />
             <Row label="Mobile" value={ticket.customers?.mobile ?? "—"} />
-            <Row label="Module" value={ticket.module} />
-            <Row label="Priority" value={ticket.priority} />
+            <Row label="Module" value={ticket.module ?? "—"} />
+            <Row label="Priority" value={ticket.priority ?? "—"} />
             <Row label="Created" value={new Date(ticket.created_at).toLocaleString()} />
             <Row label="Resolved" value={ticket.resolved_at ? new Date(ticket.resolved_at).toLocaleString() : "—"} />
           </div>
