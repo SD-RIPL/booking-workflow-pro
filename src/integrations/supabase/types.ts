@@ -989,6 +989,7 @@ export type Database = {
       }
       ticket_updates: {
         Row: {
+          author_id: string | null
           created_at: string
           id: string
           message: string
@@ -996,6 +997,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          author_id?: string | null
           created_at?: string
           id?: string
           message: string
@@ -1003,6 +1005,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          author_id?: string | null
           created_at?: string
           id?: string
           message?: string
@@ -1028,7 +1031,10 @@ export type Database = {
           customer_id: string | null
           description: string | null
           id: string
+          module: string | null
           priority: string | null
+          resolution_remark: string | null
+          resolved_at: string | null
           status: string
           subject: string
           ticket_code: string
@@ -1042,7 +1048,10 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          module?: string | null
           priority?: string | null
+          resolution_remark?: string | null
+          resolved_at?: string | null
           status?: string
           subject: string
           ticket_code?: string
@@ -1056,7 +1065,10 @@ export type Database = {
           customer_id?: string | null
           description?: string | null
           id?: string
+          module?: string | null
           priority?: string | null
+          resolution_remark?: string | null
+          resolved_at?: string | null
           status?: string
           subject?: string
           ticket_code?: string
@@ -1193,6 +1205,8 @@ export type Database = {
         | "executive"
         | "viewer"
         | "auditor"
+        | "manager"
+        | "finance"
       booking_gateway: "razorpay" | "zoho_pay" | "company_account" | "other"
       booking_stage:
         | "customer_info"
@@ -1393,6 +1407,8 @@ export const Constants = {
         "executive",
         "viewer",
         "auditor",
+        "manager",
+        "finance",
       ],
       booking_gateway: ["razorpay", "zoho_pay", "company_account", "other"],
       booking_stage: [
