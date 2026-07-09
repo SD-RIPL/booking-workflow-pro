@@ -25,19 +25,21 @@ function BookingsLayout() {
 const STAGE_LABEL: Record<string, string> = {
   booking: "Booking",
   kyc: "KYC",
-  security_deposit: "Security Deposit",
+  deposit: "Security Deposit",
+  router_config: "Router Config",
   dispatch: "Dispatch",
-  active: "Active",
-  cancelled: "Cancelled",
+  activation: "Activation",
+  completed: "Completed",
 };
 
 const STAGE_TONE: Record<string, string> = {
   booking: "bg-muted text-muted-foreground",
-  kyc: "bg-warning/20 text-warning-foreground",
-  security_deposit: "bg-info/10 text-info",
-  dispatch: "bg-primary/15 text-primary",
-  active: "bg-success/15 text-success",
-  cancelled: "bg-destructive/10 text-destructive",
+  kyc: "bg-amber-100 text-amber-800",
+  deposit: "bg-blue-100 text-blue-800",
+  router_config: "bg-indigo-100 text-indigo-800",
+  dispatch: "bg-purple-100 text-purple-800",
+  activation: "bg-teal-100 text-teal-800",
+  completed: "bg-emerald-100 text-emerald-800",
 };
 
 function BookingsList() {
@@ -48,29 +50,32 @@ function BookingsList() {
     queryKey: ["bookings-list"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("bookings" as any)
+        .from("bookings")
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      return data ?? [];
     },
   });
 
   const rows = useMemo(() => {
     const list = data ?? [];
     return list.filter((b) => {
-      if (stage !== "all" && b.current_stage !== stage) return false;
+      if (stage !== "all" && b.workflow_stage !== stage) return false;
       if (!q.trim()) return true;
       const s = q.toLowerCase();
       return [b.booking_code, b.full_name, b.mobile, b.email, b.sales_employee]
         .filter(Boolean)
-        .some((v: string) => v.toLowerCase().includes(s));
+        .some((v) => String(v).toLowerCase().includes(s));
     });
   }, [data, q, stage]);
 
   const stageCounts = useMemo(() => {
     const c: Record<string, number> = {};
-    (data ?? []).forEach((b) => { c[b.current_stage] = (c[b.current_stage] || 0) + 1; });
+    (data ?? []).forEach((b) => {
+      const key = b.workflow_stage ?? "booking";
+      c[key] = (c[key] || 0) + 1;
+    });
     return c;
   }, [data]);
 
