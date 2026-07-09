@@ -83,12 +83,12 @@ function BookingsList() {
     <>
       <PageHeader
         title="Bookings"
-        description="Customer journey: Booking → KYC → Security Deposit → Dispatch → Active"
+        description="Sequential workflow: Booking → KYC → Security Deposit → Router Config → Dispatch → Activation"
         actions={<Link to="/bookings/new"><Button><Plus className="w-4 h-4 mr-2" />New Booking</Button></Link>}
       />
       <div className="p-6 space-y-4">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-          {["booking","kyc","security_deposit","dispatch","active","cancelled"].map((s) => (
+        <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
+          {["booking","kyc","deposit","router_config","dispatch","activation","completed"].map((s) => (
             <Card key={s} className="p-3">
               <div className="text-xs text-muted-foreground">{STAGE_LABEL[s]}</div>
               <div className="text-2xl font-bold tabular-nums">{stageCounts[s] ?? 0}</div>
