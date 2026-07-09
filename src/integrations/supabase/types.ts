@@ -992,7 +992,9 @@ export type Database = {
           author_id: string | null
           created_at: string
           id: string
-          message: string
+          message: string | null
+          remark: string | null
+          status: string | null
           ticket_id: string
           updated_by: string | null
         }
@@ -1000,7 +1002,9 @@ export type Database = {
           author_id?: string | null
           created_at?: string
           id?: string
-          message: string
+          message?: string | null
+          remark?: string | null
+          status?: string | null
           ticket_id: string
           updated_by?: string | null
         }
@@ -1008,7 +1012,9 @@ export type Database = {
           author_id?: string | null
           created_at?: string
           id?: string
-          message?: string
+          message?: string | null
+          remark?: string | null
+          status?: string | null
           ticket_id?: string
           updated_by?: string | null
         }
@@ -1033,6 +1039,7 @@ export type Database = {
           id: string
           module: string | null
           priority: string | null
+          raised_by: string | null
           resolution_remark: string | null
           resolved_at: string | null
           status: string
@@ -1050,6 +1057,7 @@ export type Database = {
           id?: string
           module?: string | null
           priority?: string | null
+          raised_by?: string | null
           resolution_remark?: string | null
           resolved_at?: string | null
           status?: string
@@ -1067,6 +1075,7 @@ export type Database = {
           id?: string
           module?: string | null
           priority?: string | null
+          raised_by?: string | null
           resolution_remark?: string | null
           resolved_at?: string | null
           status?: string
