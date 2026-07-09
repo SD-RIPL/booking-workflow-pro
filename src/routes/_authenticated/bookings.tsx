@@ -139,9 +139,11 @@ function BookingsList() {
                     <td className="py-2 pr-3">{b.mobile}</td>
                     <td className="py-2 pr-3">{b.sales_employee || "—"}</td>
                     <td className="py-2 pr-3">
-                      <Badge className={STAGE_TONE[b.current_stage]} variant="secondary">{STAGE_LABEL[b.current_stage]}</Badge>
+                      <Badge className={STAGE_TONE[b.workflow_stage ?? "booking"]} variant="secondary">
+                        {STAGE_LABEL[b.workflow_stage ?? "booking"]}
+                      </Badge>
                     </td>
-                    <td className="py-2 pr-3 capitalize">{(b.kyc_verification ?? b.kyc_mail_status ?? "—").toString().replace("_"," ")}</td>
+                    <td className="py-2 pr-3 capitalize">{(b.kyc_verification ?? "—").toString().replace("_"," ")}</td>
                     <td className="py-2 pr-3 capitalize">{(b.sd_status ?? "—").toString().replace("_"," ")}</td>
                     <td className="py-2 pr-3 capitalize">{b.dispatch_status ?? "—"}</td>
                   </tr>
