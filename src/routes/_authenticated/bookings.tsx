@@ -148,10 +148,11 @@ function BookingsList() {
                     <td className="py-2 pr-3 capitalize">{(b.kyc_verification ?? "—").toString().replace("_"," ")}</td>
                     <td className="py-2 pr-3 capitalize">{(b.sd_status ?? "—").toString().replace("_"," ")}</td>
                     <td className="py-2 pr-3 capitalize">{b.dispatch_status ?? "—"}</td>
+                    <td className="py-2 pr-3"><AgeCounter from={b.created_at} warnAfter={3} dangerAfter={7} /></td>
                   </tr>
                 ))}
                 {!isLoading && rows.length === 0 && (
-                  <tr><td colSpan={9} className="py-8 text-center text-muted-foreground">No bookings yet</td></tr>
+                  <tr><td colSpan={10} className="py-8 text-center text-muted-foreground">No bookings yet</td></tr>
                 )}
               </tbody>
             </table>
