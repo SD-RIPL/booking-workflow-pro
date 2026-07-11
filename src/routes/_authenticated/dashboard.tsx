@@ -24,12 +24,14 @@ function Dashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [cust, sims, routers, recharges, payments] = await Promise.all([
-        supabase.from("customers").select("status,state,city,current_expiry_date,created_at,sim_id"),
+      const [cust, sims, routers, recharges, payments, bookings, tickets] = await Promise.all([
+        supabase.from("customers").select("status,state,city,current_expiry_date,created_at,sim_id,due_soon_flag,ready_for_suspension,days_since_last_recharge,full_name,mobile,id"),
         supabase.from("sims").select("status,company"),
         supabase.from("routers").select("status"),
         supabase.from("recharges").select("plan_amount,recharge_date"),
         supabase.from("payments").select("total_amount,collection_date"),
+        supabase.from("bookings").select("id,full_name,workflow_stage,created_at").neq("workflow_stage", "completed").order("created_at", { ascending: true }).limit(5),
+        supabase.from("tickets").select("id,ticket_code,subject,created_at,status").in("status", ["open","in_progress"]).order("created_at", { ascending: true }).limit(5),
       ]);
       return {
         customers: cust.data ?? [],
@@ -37,6 +39,8 @@ function Dashboard() {
         routers: routers.data ?? [],
         recharges: recharges.data ?? [],
         payments: payments.data ?? [],
+        pendingBookings: bookings.data ?? [],
+        openTickets: tickets.data ?? [],
       };
     },
   });
