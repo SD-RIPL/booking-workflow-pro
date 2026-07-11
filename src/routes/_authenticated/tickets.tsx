@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/crm";
+import { AgeCounter } from "@/components/AgeCounter";
 
 export const Route = createFileRoute("/_authenticated/tickets")({
   ssr: false,
