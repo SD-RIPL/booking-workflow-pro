@@ -61,6 +61,48 @@ function Dashboard() {
           <Kpi icon={TrendingUp} label="New This Month" value={stats.newThisMonth} tone="info" />
         </div>
 
+        {/* Recharge automation flags */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Kpi icon={Clock} label="25-Day Due Soon" value={stats.rechargeDueSoon} tone="warning" />
+          <Kpi icon={ShieldAlert} label="30-Day Ready for Suspension" value={stats.readyForSuspension} tone="destructive" />
+          <Kpi icon={AlertTriangle} label="Pending Bookings" value={(data?.pendingBookings ?? []).length} tone="warning" />
+          <Kpi icon={AlertTriangle} label="Open Tickets" value={(data?.openTickets ?? []).length} tone="info" />
+        </div>
+
+        {/* Age counters — oldest pending items */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" />Oldest Pending Bookings</h3>
+            <div className="space-y-2">
+              {(data?.pendingBookings ?? []).map((b: any) => (
+                <div key={b.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <div className="font-medium">{b.full_name}</div>
+                    <div className="text-xs text-muted-foreground capitalize">Stage: {b.workflow_stage}</div>
+                  </div>
+                  <AgeCounter from={b.created_at} warnAfter={3} dangerAfter={7} />
+                </div>
+              ))}
+              {(data?.pendingBookings ?? []).length === 0 && <p className="text-xs text-muted-foreground">No pending bookings.</p>}
+            </div>
+          </Card>
+          <Card className="p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" />Oldest Open Tickets</h3>
+            <div className="space-y-2">
+              {(data?.openTickets ?? []).map((t: any) => (
+                <div key={t.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <div className="font-medium font-mono text-xs">{t.ticket_code}</div>
+                    <div className="text-xs text-muted-foreground truncate max-w-[200px]">{t.subject}</div>
+                  </div>
+                  <AgeCounter from={t.created_at} warnAfter={2} dangerAfter={5} />
+                </div>
+              ))}
+              {(data?.openTickets ?? []).length === 0 && <p className="text-xs text-muted-foreground">No open tickets.</p>}
+            </div>
+          </Card>
+        </div>
+
         {/* Revenue cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <RevenueCard label="Today" value={stats.revToday} />
