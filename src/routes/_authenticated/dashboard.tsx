@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import { formatINR } from "@/lib/crm";
 import {
   Users, UserCheck, AlertTriangle, XCircle, PauseCircle, IndianRupee,
-  Smartphone, Router as RouterIcon, TrendingUp,
+  Smartphone, Router as RouterIcon, TrendingUp, Clock, ShieldAlert,
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Line, LineChart } from "recharts";
 import { useEffect } from "react";
+import { AgeCounter } from "@/components/AgeCounter";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   ssr: false,
