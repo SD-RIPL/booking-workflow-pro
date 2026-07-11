@@ -402,7 +402,9 @@ export type Database = {
           current_expiry_date: string | null
           current_plan_id: string | null
           customer_code: string
+          days_since_last_recharge: number | null
           district: string | null
+          due_soon_flag: boolean
           email: string | null
           expiry_date: string | null
           father_name: string | null
@@ -417,6 +419,7 @@ export type Database = {
           mobile: string
           notes: string | null
           pincode: string | null
+          ready_for_suspension: boolean
           remaining_days: number | null
           router_id: string | null
           sim_id: string | null
@@ -437,7 +440,9 @@ export type Database = {
           current_expiry_date?: string | null
           current_plan_id?: string | null
           customer_code?: string
+          days_since_last_recharge?: number | null
           district?: string | null
+          due_soon_flag?: boolean
           email?: string | null
           expiry_date?: string | null
           father_name?: string | null
@@ -452,6 +457,7 @@ export type Database = {
           mobile: string
           notes?: string | null
           pincode?: string | null
+          ready_for_suspension?: boolean
           remaining_days?: number | null
           router_id?: string | null
           sim_id?: string | null
@@ -472,7 +478,9 @@ export type Database = {
           current_expiry_date?: string | null
           current_plan_id?: string | null
           customer_code?: string
+          days_since_last_recharge?: number | null
           district?: string | null
+          due_soon_flag?: boolean
           email?: string | null
           expiry_date?: string | null
           father_name?: string | null
@@ -487,6 +495,7 @@ export type Database = {
           mobile?: string
           notes?: string | null
           pincode?: string | null
+          ready_for_suspension?: boolean
           remaining_days?: number | null
           router_id?: string | null
           sim_id?: string | null
