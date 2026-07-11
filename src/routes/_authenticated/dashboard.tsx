@@ -251,6 +251,8 @@ function computeStats(data: any) {
     expired: customers.filter((c: any) => c.status === "expired").length,
     suspended: customers.filter((c: any) => c.status === "suspended").length,
     newThisMonth: customers.filter((c: any) => new Date(c.created_at) >= startOfMonth).length,
+    rechargeDueSoon: customers.filter((c: any) => c.due_soon_flag).length,
+    readyForSuspension: customers.filter((c: any) => c.ready_for_suspension).length,
     revToday, revWeek, revMonth, revAll,
     simsAvailable: sims.filter((s: any) => s.status === "available").length,
     simsAssigned: sims.filter((s: any) => s.status !== "available").length,
