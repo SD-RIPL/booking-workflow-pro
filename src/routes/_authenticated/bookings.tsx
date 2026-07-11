@@ -127,6 +127,7 @@ function BookingsList() {
                   <th className="py-2 pr-3">KYC</th>
                   <th className="py-2 pr-3">SD</th>
                   <th className="py-2 pr-3">Dispatch</th>
+                  <th className="py-2 pr-3">Age</th>
                 </tr>
               </thead>
               <tbody>
