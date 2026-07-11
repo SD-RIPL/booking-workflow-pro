@@ -6,10 +6,11 @@ import { Card } from "@/components/ui/card";
 import { formatINR } from "@/lib/crm";
 import {
   Users, UserCheck, AlertTriangle, XCircle, PauseCircle, IndianRupee,
-  Smartphone, Router as RouterIcon, TrendingUp,
+  Smartphone, Router as RouterIcon, TrendingUp, Clock, ShieldAlert,
 } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, Line, LineChart } from "recharts";
 import { useEffect } from "react";
+import { AgeCounter } from "@/components/AgeCounter";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   ssr: false,
@@ -23,12 +24,14 @@ function Dashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [cust, sims, routers, recharges, payments] = await Promise.all([
-        supabase.from("customers").select("status,state,city,current_expiry_date,created_at,sim_id"),
+      const [cust, sims, routers, recharges, payments, bookings, tickets] = await Promise.all([
+        supabase.from("customers").select("status,state,city,current_expiry_date,created_at,sim_id,due_soon_flag,ready_for_suspension,days_since_last_recharge,full_name,mobile,id"),
         supabase.from("sims").select("status,company"),
         supabase.from("routers").select("status"),
         supabase.from("recharges").select("plan_amount,recharge_date"),
         supabase.from("payments").select("total_amount,collection_date"),
+        supabase.from("bookings").select("id,full_name,workflow_stage,created_at").neq("workflow_stage", "completed").order("created_at", { ascending: true }).limit(5),
+        supabase.from("tickets").select("id,ticket_code,subject,created_at,status").in("status", ["open","in_progress"]).order("created_at", { ascending: true }).limit(5),
       ]);
       return {
         customers: cust.data ?? [],
@@ -36,6 +39,8 @@ function Dashboard() {
         routers: routers.data ?? [],
         recharges: recharges.data ?? [],
         payments: payments.data ?? [],
+        pendingBookings: bookings.data ?? [],
+        openTickets: tickets.data ?? [],
       };
     },
   });
@@ -54,6 +59,48 @@ function Dashboard() {
           <Kpi icon={XCircle} label="Expired" value={stats.expired} tone="destructive" />
           <Kpi icon={PauseCircle} label="Suspended" value={stats.suspended} tone="muted" />
           <Kpi icon={TrendingUp} label="New This Month" value={stats.newThisMonth} tone="info" />
+        </div>
+
+        {/* Recharge automation flags */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Kpi icon={Clock} label="25-Day Due Soon" value={stats.rechargeDueSoon} tone="warning" />
+          <Kpi icon={ShieldAlert} label="30-Day Ready for Suspension" value={stats.readyForSuspension} tone="destructive" />
+          <Kpi icon={AlertTriangle} label="Pending Bookings" value={(data?.pendingBookings ?? []).length} tone="warning" />
+          <Kpi icon={AlertTriangle} label="Open Tickets" value={(data?.openTickets ?? []).length} tone="info" />
+        </div>
+
+        {/* Age counters — oldest pending items */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" />Oldest Pending Bookings</h3>
+            <div className="space-y-2">
+              {(data?.pendingBookings ?? []).map((b: any) => (
+                <div key={b.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <div className="font-medium">{b.full_name}</div>
+                    <div className="text-xs text-muted-foreground capitalize">Stage: {b.workflow_stage}</div>
+                  </div>
+                  <AgeCounter from={b.created_at} warnAfter={3} dangerAfter={7} />
+                </div>
+              ))}
+              {(data?.pendingBookings ?? []).length === 0 && <p className="text-xs text-muted-foreground">No pending bookings.</p>}
+            </div>
+          </Card>
+          <Card className="p-5">
+            <h3 className="font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4" />Oldest Open Tickets</h3>
+            <div className="space-y-2">
+              {(data?.openTickets ?? []).map((t: any) => (
+                <div key={t.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <div className="font-medium font-mono text-xs">{t.ticket_code}</div>
+                    <div className="text-xs text-muted-foreground truncate max-w-[200px]">{t.subject}</div>
+                  </div>
+                  <AgeCounter from={t.created_at} warnAfter={2} dangerAfter={5} />
+                </div>
+              ))}
+              {(data?.openTickets ?? []).length === 0 && <p className="text-xs text-muted-foreground">No open tickets.</p>}
+            </div>
+          </Card>
         </div>
 
         {/* Revenue cards */}
@@ -204,6 +251,8 @@ function computeStats(data: any) {
     expired: customers.filter((c: any) => c.status === "expired").length,
     suspended: customers.filter((c: any) => c.status === "suspended").length,
     newThisMonth: customers.filter((c: any) => new Date(c.created_at) >= startOfMonth).length,
+    rechargeDueSoon: customers.filter((c: any) => c.due_soon_flag).length,
+    readyForSuspension: customers.filter((c: any) => c.ready_for_suspension).length,
     revToday, revWeek, revMonth, revAll,
     simsAvailable: sims.filter((s: any) => s.status === "available").length,
     simsAssigned: sims.filter((s: any) => s.status !== "available").length,

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { logAudit } from "@/lib/crm";
+import { AgeCounter } from "@/components/AgeCounter";
 
 export const Route = createFileRoute("/_authenticated/tickets")({
   ssr: false,
@@ -72,6 +73,7 @@ function TicketsPage() {
                 <th className="text-left px-4 py-3">Priority</th>
                 <th className="text-left px-4 py-3">Status</th>
                 <th className="text-left px-4 py-3">Created</th>
+                <th className="text-left px-4 py-3">Age</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -84,10 +86,11 @@ function TicketsPage() {
                   <td className="px-4 py-3 capitalize">{t.priority}</td>
                   <td className="px-4 py-3"><Badge className={STATUS_COLOR[t.status]}>{t.status.replace("_", " ")}</Badge></td>
                   <td className="px-4 py-3 text-muted-foreground">{new Date(t.created_at).toLocaleString()}</td>
+                  <td className="px-4 py-3"><AgeCounter from={t.created_at} warnAfter={2} dangerAfter={5} /></td>
                 </tr>
               ))}
               {(tickets?.length ?? 0) === 0 && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">No tickets yet.</td></tr>
+                <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground">No tickets yet.</td></tr>
               )}
             </tbody>
           </table>
