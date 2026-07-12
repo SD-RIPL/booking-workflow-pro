@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedTrashRouteImport } from './routes/_authenticated/trash'
 import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
 import { Route as AuthenticatedSuspensionsRouteImport } from './routes/_authenticated/suspensions'
 import { Route as AuthenticatedSimsRouteImport } from './routes/_authenticated/sims'
@@ -22,12 +23,15 @@ import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedRoutersRouteImport } from './routes/_authenticated/routers'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedRechargesRouteImport } from './routes/_authenticated/recharges'
+import { Route as AuthenticatedPermissionsRouteImport } from './routes/_authenticated/permissions'
 import { Route as AuthenticatedPaymentsRouteImport } from './routes/_authenticated/payments'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedChatbotRouteImport } from './routes/_authenticated/chatbot'
 import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
 import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers/index'
+import { Route as ApiPublicSendNotificationsRouteImport } from './routes/api/public/send-notifications'
 import { Route as AuthenticatedCustomersNewRouteImport } from './routes/_authenticated/customers/new'
 import { Route as AuthenticatedCustomersIdRouteImport } from './routes/_authenticated/customers/$id'
 import { Route as AuthenticatedBookingsNewRouteImport } from './routes/_authenticated/bookings/new'
@@ -60,6 +64,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTrashRoute = AuthenticatedTrashRouteImport.update({
+  id: '/trash',
+  path: '/trash',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
@@ -98,11 +107,23 @@ const AuthenticatedRechargesRoute = AuthenticatedRechargesRouteImport.update({
   path: '/recharges',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPermissionsRoute =
+  AuthenticatedPermissionsRouteImport.update({
+    id: '/permissions',
+    path: '/permissions',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPaymentsRoute = AuthenticatedPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -128,6 +149,12 @@ const AuthenticatedCustomersIndexRoute =
     id: '/customers/',
     path: '/customers/',
     getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicSendNotificationsRoute =
+  ApiPublicSendNotificationsRouteImport.update({
+    id: '/api/public/send-notifications',
+    path: '/api/public/send-notifications',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedCustomersNewRoute =
   AuthenticatedCustomersNewRouteImport.update({
@@ -161,7 +188,9 @@ export interface FileRoutesByFullPath {
   '/bookings': typeof AuthenticatedBookingsRouteWithChildren
   '/chatbot': typeof AuthenticatedChatbotRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/permissions': typeof AuthenticatedPermissionsRoute
   '/recharges': typeof AuthenticatedRechargesRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/routers': typeof AuthenticatedRoutersRoute
@@ -169,12 +198,14 @@ export interface FileRoutesByFullPath {
   '/sims': typeof AuthenticatedSimsRoute
   '/suspensions': typeof AuthenticatedSuspensionsRoute
   '/tickets': typeof AuthenticatedTicketsRoute
+  '/trash': typeof AuthenticatedTrashRoute
   '/users': typeof AuthenticatedUsersRoute
   '/api/chat': typeof ApiChatRoute
   '/bookings/$id': typeof AuthenticatedBookingsIdRoute
   '/bookings/new': typeof AuthenticatedBookingsNewRoute
   '/customers/$id': typeof AuthenticatedCustomersIdRoute
   '/customers/new': typeof AuthenticatedCustomersNewRoute
+  '/api/public/send-notifications': typeof ApiPublicSendNotificationsRoute
   '/customers/': typeof AuthenticatedCustomersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -185,7 +216,9 @@ export interface FileRoutesByTo {
   '/bookings': typeof AuthenticatedBookingsRouteWithChildren
   '/chatbot': typeof AuthenticatedChatbotRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/payments': typeof AuthenticatedPaymentsRoute
+  '/permissions': typeof AuthenticatedPermissionsRoute
   '/recharges': typeof AuthenticatedRechargesRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/routers': typeof AuthenticatedRoutersRoute
@@ -193,12 +226,14 @@ export interface FileRoutesByTo {
   '/sims': typeof AuthenticatedSimsRoute
   '/suspensions': typeof AuthenticatedSuspensionsRoute
   '/tickets': typeof AuthenticatedTicketsRoute
+  '/trash': typeof AuthenticatedTrashRoute
   '/users': typeof AuthenticatedUsersRoute
   '/api/chat': typeof ApiChatRoute
   '/bookings/$id': typeof AuthenticatedBookingsIdRoute
   '/bookings/new': typeof AuthenticatedBookingsNewRoute
   '/customers/$id': typeof AuthenticatedCustomersIdRoute
   '/customers/new': typeof AuthenticatedCustomersNewRoute
+  '/api/public/send-notifications': typeof ApiPublicSendNotificationsRoute
   '/customers': typeof AuthenticatedCustomersIndexRoute
 }
 export interface FileRoutesById {
@@ -211,7 +246,9 @@ export interface FileRoutesById {
   '/_authenticated/bookings': typeof AuthenticatedBookingsRouteWithChildren
   '/_authenticated/chatbot': typeof AuthenticatedChatbotRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/payments': typeof AuthenticatedPaymentsRoute
+  '/_authenticated/permissions': typeof AuthenticatedPermissionsRoute
   '/_authenticated/recharges': typeof AuthenticatedRechargesRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/routers': typeof AuthenticatedRoutersRoute
@@ -219,12 +256,14 @@ export interface FileRoutesById {
   '/_authenticated/sims': typeof AuthenticatedSimsRoute
   '/_authenticated/suspensions': typeof AuthenticatedSuspensionsRoute
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
+  '/_authenticated/trash': typeof AuthenticatedTrashRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/bookings/$id': typeof AuthenticatedBookingsIdRoute
   '/_authenticated/bookings/new': typeof AuthenticatedBookingsNewRoute
   '/_authenticated/customers/$id': typeof AuthenticatedCustomersIdRoute
   '/_authenticated/customers/new': typeof AuthenticatedCustomersNewRoute
+  '/api/public/send-notifications': typeof ApiPublicSendNotificationsRoute
   '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
 }
 export interface FileRouteTypes {
@@ -237,7 +276,9 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/chatbot'
     | '/dashboard'
+    | '/notifications'
     | '/payments'
+    | '/permissions'
     | '/recharges'
     | '/reports'
     | '/routers'
@@ -245,12 +286,14 @@ export interface FileRouteTypes {
     | '/sims'
     | '/suspensions'
     | '/tickets'
+    | '/trash'
     | '/users'
     | '/api/chat'
     | '/bookings/$id'
     | '/bookings/new'
     | '/customers/$id'
     | '/customers/new'
+    | '/api/public/send-notifications'
     | '/customers/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -261,7 +304,9 @@ export interface FileRouteTypes {
     | '/bookings'
     | '/chatbot'
     | '/dashboard'
+    | '/notifications'
     | '/payments'
+    | '/permissions'
     | '/recharges'
     | '/reports'
     | '/routers'
@@ -269,12 +314,14 @@ export interface FileRouteTypes {
     | '/sims'
     | '/suspensions'
     | '/tickets'
+    | '/trash'
     | '/users'
     | '/api/chat'
     | '/bookings/$id'
     | '/bookings/new'
     | '/customers/$id'
     | '/customers/new'
+    | '/api/public/send-notifications'
     | '/customers'
   id:
     | '__root__'
@@ -286,7 +333,9 @@ export interface FileRouteTypes {
     | '/_authenticated/bookings'
     | '/_authenticated/chatbot'
     | '/_authenticated/dashboard'
+    | '/_authenticated/notifications'
     | '/_authenticated/payments'
+    | '/_authenticated/permissions'
     | '/_authenticated/recharges'
     | '/_authenticated/reports'
     | '/_authenticated/routers'
@@ -294,12 +343,14 @@ export interface FileRouteTypes {
     | '/_authenticated/sims'
     | '/_authenticated/suspensions'
     | '/_authenticated/tickets'
+    | '/_authenticated/trash'
     | '/_authenticated/users'
     | '/api/chat'
     | '/_authenticated/bookings/$id'
     | '/_authenticated/bookings/new'
     | '/_authenticated/customers/$id'
     | '/_authenticated/customers/new'
+    | '/api/public/send-notifications'
     | '/_authenticated/customers/'
   fileRoutesById: FileRoutesById
 }
@@ -309,6 +360,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiPublicSendNotificationsRoute: typeof ApiPublicSendNotificationsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -353,6 +405,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/trash': {
+      id: '/_authenticated/trash'
+      path: '/trash'
+      fullPath: '/trash'
+      preLoaderRoute: typeof AuthenticatedTrashRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tickets': {
@@ -404,11 +463,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRechargesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/permissions': {
+      id: '/_authenticated/permissions'
+      path: '/permissions'
+      fullPath: '/permissions'
+      preLoaderRoute: typeof AuthenticatedPermissionsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/payments': {
       id: '/_authenticated/payments'
       path: '/payments'
       fullPath: '/payments'
       preLoaderRoute: typeof AuthenticatedPaymentsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -445,6 +518,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/customers/'
       preLoaderRoute: typeof AuthenticatedCustomersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/send-notifications': {
+      id: '/api/public/send-notifications'
+      path: '/api/public/send-notifications'
+      fullPath: '/api/public/send-notifications'
+      preLoaderRoute: typeof ApiPublicSendNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/customers/new': {
       id: '/_authenticated/customers/new'
@@ -497,7 +577,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRouteWithChildren
   AuthenticatedChatbotRoute: typeof AuthenticatedChatbotRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPaymentsRoute: typeof AuthenticatedPaymentsRoute
+  AuthenticatedPermissionsRoute: typeof AuthenticatedPermissionsRoute
   AuthenticatedRechargesRoute: typeof AuthenticatedRechargesRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedRoutersRoute: typeof AuthenticatedRoutersRoute
@@ -505,6 +587,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSimsRoute: typeof AuthenticatedSimsRoute
   AuthenticatedSuspensionsRoute: typeof AuthenticatedSuspensionsRoute
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
+  AuthenticatedTrashRoute: typeof AuthenticatedTrashRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedCustomersIdRoute: typeof AuthenticatedCustomersIdRoute
   AuthenticatedCustomersNewRoute: typeof AuthenticatedCustomersNewRoute
@@ -516,7 +599,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBookingsRoute: AuthenticatedBookingsRouteWithChildren,
   AuthenticatedChatbotRoute: AuthenticatedChatbotRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPaymentsRoute: AuthenticatedPaymentsRoute,
+  AuthenticatedPermissionsRoute: AuthenticatedPermissionsRoute,
   AuthenticatedRechargesRoute: AuthenticatedRechargesRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedRoutersRoute: AuthenticatedRoutersRoute,
@@ -524,6 +609,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSimsRoute: AuthenticatedSimsRoute,
   AuthenticatedSuspensionsRoute: AuthenticatedSuspensionsRoute,
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
+  AuthenticatedTrashRoute: AuthenticatedTrashRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedCustomersIdRoute: AuthenticatedCustomersIdRoute,
   AuthenticatedCustomersNewRoute: AuthenticatedCustomersNewRoute,
@@ -539,6 +625,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiPublicSendNotificationsRoute: ApiPublicSendNotificationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

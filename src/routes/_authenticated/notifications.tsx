@@ -70,10 +70,14 @@ function NotificationsPage() {
 
   return (
     <>
-      <PageHeader title="Notifications" description={`${data?.length ?? 0} messages`}>
-        <Button variant="outline" onClick={seedFromFlags}><RefreshCcw className="w-4 h-4 mr-1" /> Queue reminders</Button>
-        <Button onClick={sendPending} disabled={sending}><Send className="w-4 h-4 mr-1" /> {sending ? "Sending…" : "Send pending"}</Button>
-      </PageHeader>
+      <PageHeader
+        title="Notifications"
+        description={`${data?.length ?? 0} messages`}
+        actions={<>
+          <Button variant="outline" onClick={seedFromFlags}><RefreshCcw className="w-4 h-4 mr-1" /> Queue reminders</Button>
+          <Button onClick={sendPending} disabled={sending}><Send className="w-4 h-4 mr-1" /> {sending ? "Sending…" : "Send pending"}</Button>
+        </>}
+      />
       <div className="p-6">
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
