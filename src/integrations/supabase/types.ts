@@ -164,6 +164,8 @@ export type Database = {
           created_by: string | null
           current_stage: Database["public"]["Enums"]["booking_stage"]
           customer_id: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           delivery_date: string | null
           dispatch_schedule_date: string | null
           dispatch_status: string | null
@@ -245,6 +247,8 @@ export type Database = {
           created_by?: string | null
           current_stage?: Database["public"]["Enums"]["booking_stage"]
           customer_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           delivery_date?: string | null
           dispatch_schedule_date?: string | null
           dispatch_status?: string | null
@@ -326,6 +330,8 @@ export type Database = {
           created_by?: string | null
           current_stage?: Database["public"]["Enums"]["booking_stage"]
           customer_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           delivery_date?: string | null
           dispatch_schedule_date?: string | null
           dispatch_status?: string | null
@@ -403,6 +409,8 @@ export type Database = {
           current_plan_id: string | null
           customer_code: string
           days_since_last_recharge: number | null
+          deleted_at: string | null
+          deleted_by: string | null
           district: string | null
           due_soon_flag: boolean
           email: string | null
@@ -441,6 +449,8 @@ export type Database = {
           current_plan_id?: string | null
           customer_code?: string
           days_since_last_recharge?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           district?: string | null
           due_soon_flag?: boolean
           email?: string | null
@@ -479,6 +489,8 @@ export type Database = {
           current_plan_id?: string | null
           customer_code?: string
           days_since_last_recharge?: number | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           district?: string | null
           due_soon_flag?: boolean
           email?: string | null
@@ -535,6 +547,62 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          error: string | null
+          id: string
+          message: string
+          phone: string
+          provider_sid: string | null
+          sent_at: string | null
+          status: string
+          template: string
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          message: string
+          phone: string
+          provider_sid?: string | null
+          sent_at?: string | null
+          status?: string
+          template: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          error?: string | null
+          id?: string
+          message?: string
+          phone?: string
+          provider_sid?: string | null
+          sent_at?: string | null
+          status?: string
+          template?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -543,6 +611,8 @@ export type Database = {
           collection_date: string
           created_at: string
           customer_id: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           deposit_id: string | null
           gst: number | null
           id: string
@@ -562,6 +632,8 @@ export type Database = {
           collection_date?: string
           created_at?: string
           customer_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           deposit_id?: string | null
           gst?: number | null
           id?: string
@@ -581,6 +653,8 @@ export type Database = {
           collection_date?: string
           created_at?: string
           customer_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           deposit_id?: string | null
           gst?: number | null
           id?: string
@@ -696,6 +770,8 @@ export type Database = {
           collection_source: string | null
           created_at: string
           customer_id: string
+          deleted_at: string | null
+          deleted_by: string | null
           discount: number | null
           expiry_date: string
           gst_amount: number | null
@@ -717,6 +793,8 @@ export type Database = {
           collection_source?: string | null
           created_at?: string
           customer_id: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           discount?: number | null
           expiry_date: string
           gst_amount?: number | null
@@ -738,6 +816,8 @@ export type Database = {
           collection_source?: string | null
           created_at?: string
           customer_id?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           discount?: number | null
           expiry_date?: string
           gst_amount?: number | null
@@ -776,6 +856,8 @@ export type Database = {
           condition: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           installation_date: string | null
           model: string | null
@@ -793,6 +875,8 @@ export type Database = {
           condition?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           installation_date?: string | null
           model?: string | null
@@ -810,6 +894,8 @@ export type Database = {
           condition?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           installation_date?: string | null
           model?: string | null
@@ -908,6 +994,8 @@ export type Database = {
           company: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           notes: string | null
           packet_number: string | null
@@ -923,6 +1011,8 @@ export type Database = {
           company?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           notes?: string | null
           packet_number?: string | null
@@ -938,6 +1028,8 @@ export type Database = {
           company?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           notes?: string | null
           packet_number?: string | null
@@ -953,6 +1045,8 @@ export type Database = {
         Row: {
           created_at: string
           customer_id: string
+          deleted_at: string | null
+          deleted_by: string | null
           id: string
           reason: string | null
           resume_notes: string | null
@@ -965,6 +1059,8 @@ export type Database = {
         Insert: {
           created_at?: string
           customer_id: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           reason?: string | null
           resume_notes?: string | null
@@ -977,6 +1073,8 @@ export type Database = {
         Update: {
           created_at?: string
           customer_id?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
           id?: string
           reason?: string | null
           resume_notes?: string | null
@@ -1044,6 +1142,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           customer_id: string | null
+          deleted_at: string | null
+          deleted_by: string | null
           description: string | null
           id: string
           module: string | null
@@ -1062,6 +1162,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           module?: string | null
@@ -1080,6 +1182,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           customer_id?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
           description?: string | null
           id?: string
           module?: string | null
@@ -1202,13 +1306,19 @@ export type Database = {
         }
         Returns: string
       }
+      purge_row: { Args: { _id: string; _table: string }; Returns: boolean }
       refresh_customer_status: { Args: never; Returns: number }
       refresh_customer_statuses: { Args: never; Returns: number }
+      restore_row: { Args: { _id: string; _table: string }; Returns: boolean }
       revoke_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
           p_user_id: string
         }
+        Returns: boolean
+      }
+      soft_delete_row: {
+        Args: { _id: string; _table: string }
         Returns: boolean
       }
     }
