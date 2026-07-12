@@ -17,6 +17,7 @@ function RechargesPage() {
     queryFn: async () => (await supabase
       .from("recharges")
       .select("*, customers(full_name, mobile, customer_code)")
+      .is("deleted_at", null)
       .order("recharge_date", { ascending: false })
       .limit(500)).data ?? [],
   });

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/suspensions")({
 function SuspensionsPage() {
   const { data } = useQuery({
     queryKey: ["suspensions"],
-    queryFn: async () => (await supabase.from("suspensions").select("*, customers(full_name, customer_code, mobile, status)").order("suspended_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("suspensions").select("*, customers(full_name, customer_code, mobile, status)").is("deleted_at", null).order("suspended_at", { ascending: false })).data ?? [],
   });
   return (
     <>

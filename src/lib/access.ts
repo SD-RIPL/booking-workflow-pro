@@ -11,10 +11,13 @@ export const MODULES = [
   "routers",
   "suspensions",
   "tickets",
+  "notifications",
   "chatbot",
   "reports",
   "audit",
   "search",
+  "trash",
+  "permissions",
   "users",
 ] as const;
 
@@ -30,10 +33,13 @@ export const MODULE_LABEL: Record<Module, string> = {
   routers: "Routers",
   suspensions: "Suspensions",
   tickets: "Tickets",
+  notifications: "Notifications",
   chatbot: "Chatbot",
   reports: "Reports",
   audit: "Audit Log",
   search: "Search",
+  trash: "Trash",
+  permissions: "Permissions",
   users: "User Management",
 };
 
@@ -57,9 +63,9 @@ export const ROLE_LABEL: Record<Role, string> = {
 export const ROLE_DEFAULT_MODULES: Record<Role, Module[]> = {
   super_admin: [...MODULES],
   admin: MODULES.filter((m) => m !== "users") as Module[],
-  manager: ["dashboard", "bookings", "customers", "recharges", "payments", "tickets", "chatbot", "reports", "audit", "search"],
+  manager: ["dashboard", "bookings", "customers", "recharges", "payments", "tickets", "notifications", "chatbot", "reports", "audit", "search"],
   operator: ["dashboard", "bookings", "customers", "recharges", "sims", "routers", "tickets", "chatbot", "search"],
-  support: ["dashboard", "bookings", "customers", "suspensions", "tickets", "chatbot", "search"],
+  support: ["dashboard", "bookings", "customers", "suspensions", "tickets", "notifications", "chatbot", "search"],
   finance: ["dashboard", "bookings", "payments", "recharges", "reports", "search"],
 };
 

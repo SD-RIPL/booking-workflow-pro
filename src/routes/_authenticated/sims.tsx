@@ -22,7 +22,7 @@ function SimsPage() {
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["sims"],
-    queryFn: async () => (await supabase.from("sims").select("*, customers(full_name, customer_code)").order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("sims").select("*, customers(full_name, customer_code)").is("deleted_at", null).order("created_at", { ascending: false })).data ?? [],
   });
   return (
     <>
