@@ -14,7 +14,7 @@ function PaymentsPage() {
   const { data } = useQuery({
     queryKey: ["payments-all"],
     queryFn: async () => (await supabase
-      .from("payments")
+      .from("payments").is("deleted_at", null)
       .select("*, customers(full_name, mobile, customer_code)")
       .order("collection_date", { ascending: false })
       .limit(500)).data ?? [],

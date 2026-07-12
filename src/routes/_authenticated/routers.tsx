@@ -21,7 +21,7 @@ function RoutersPage() {
   const qc = useQueryClient();
   const { data } = useQuery({
     queryKey: ["routers"],
-    queryFn: async () => (await supabase.from("routers").select("*, customers(full_name)").order("created_at", { ascending: false })).data ?? [],
+    queryFn: async () => (await supabase.from("routers").select("*, customers(full_name)").is("deleted_at", null).order("created_at", { ascending: false })).data ?? [],
   });
   return (
     <>

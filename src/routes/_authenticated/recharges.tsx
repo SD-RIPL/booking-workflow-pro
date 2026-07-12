@@ -15,7 +15,7 @@ function RechargesPage() {
   const { data } = useQuery({
     queryKey: ["recharges-all"],
     queryFn: async () => (await supabase
-      .from("recharges")
+      .from("recharges").is("deleted_at", null)
       .select("*, customers(full_name, mobile, customer_code)")
       .order("recharge_date", { ascending: false })
       .limit(500)).data ?? [],
