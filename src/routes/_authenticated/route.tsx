@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard, Users, CreditCard, Smartphone, Router as RouterIcon,
   Wallet, PauseCircle, FileText, Search, Wifi, LogOut, ScrollText, ShieldCheck, Lock,
-  LifeBuoy, Bot, ClipboardList,
+  LifeBuoy, Bot, ClipboardList, Trash2, KeyRound, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -23,20 +23,23 @@ export const Route = createFileRoute("/_authenticated")({
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; module: Module };
 
 const NAV: NavItem[] = [
-  { to: "/dashboard",   label: "Dashboard",   icon: LayoutDashboard, module: "dashboard" },
-  { to: "/bookings",    label: "Bookings",    icon: ClipboardList,   module: "bookings" },
-  { to: "/customers",   label: "Customers",   icon: Users,           module: "customers" },
-  { to: "/recharges",   label: "Recharges",   icon: CreditCard,      module: "recharges" },
-  { to: "/payments",    label: "Payments",    icon: Wallet,          module: "payments" },
-  { to: "/sims",        label: "SIMs",        icon: Smartphone,      module: "sims" },
-  { to: "/routers",     label: "Routers",     icon: RouterIcon,      module: "routers" },
-  { to: "/suspensions", label: "Suspensions", icon: PauseCircle,     module: "suspensions" },
-  { to: "/tickets",     label: "Tickets",     icon: LifeBuoy,        module: "tickets" },
-  { to: "/chatbot",     label: "Chatbot",     icon: Bot,             module: "chatbot" },
-  { to: "/reports",     label: "Reports",     icon: FileText,        module: "reports" },
-  { to: "/audit",       label: "Audit Log",   icon: ScrollText,      module: "audit" },
-  { to: "/search",      label: "Search",      icon: Search,          module: "search" },
-  { to: "/users",       label: "Users",       icon: ShieldCheck,     module: "users" },
+  { to: "/dashboard",     label: "Dashboard",     icon: LayoutDashboard, module: "dashboard" },
+  { to: "/bookings",      label: "Bookings",      icon: ClipboardList,   module: "bookings" },
+  { to: "/customers",     label: "Customers",     icon: Users,           module: "customers" },
+  { to: "/recharges",     label: "Recharges",     icon: CreditCard,      module: "recharges" },
+  { to: "/payments",      label: "Payments",      icon: Wallet,          module: "payments" },
+  { to: "/sims",          label: "SIMs",          icon: Smartphone,      module: "sims" },
+  { to: "/routers",       label: "Routers",       icon: RouterIcon,      module: "routers" },
+  { to: "/suspensions",   label: "Suspensions",   icon: PauseCircle,     module: "suspensions" },
+  { to: "/tickets",       label: "Tickets",       icon: LifeBuoy,        module: "tickets" },
+  { to: "/notifications", label: "Notifications", icon: Bell,            module: "notifications" },
+  { to: "/chatbot",       label: "Chatbot",       icon: Bot,             module: "chatbot" },
+  { to: "/reports",       label: "Reports",       icon: FileText,        module: "reports" },
+  { to: "/audit",         label: "Audit Log",     icon: ScrollText,      module: "audit" },
+  { to: "/search",        label: "Search",        icon: Search,          module: "search" },
+  { to: "/trash",         label: "Trash",         icon: Trash2,          module: "trash" },
+  { to: "/permissions",   label: "Permissions",   icon: KeyRound,        module: "permissions" },
+  { to: "/users",         label: "Users",         icon: ShieldCheck,     module: "users" },
 ];
 
 function AuthenticatedLayout() {
