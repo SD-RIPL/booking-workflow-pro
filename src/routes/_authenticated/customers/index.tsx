@@ -115,6 +115,10 @@ function CustomersList() {
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
+                  <th className="px-3 py-3 w-8"><Checkbox
+                    checked={(data?.length ?? 0) > 0 && selected.size === data!.length}
+                    onCheckedChange={(c) => setSelected(c ? new Set((data ?? []).map((r: any) => r.id)) : new Set())}
+                  /></th>
                   <th className="text-left px-4 py-3">Customer ID</th>
                   <th className="text-left px-4 py-3">Name</th>
                   <th className="text-left px-4 py-3">Mobile</th>
@@ -125,12 +129,20 @@ function CustomersList() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {isLoading && <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Loading…</td></tr>}
-                {!isLoading && (data?.length ?? 0) === 0 && <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No customers found.</td></tr>}
+                {isLoading && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">Loading…</td></tr>}
+                {!isLoading && (data?.length ?? 0) === 0 && <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No customers found.</td></tr>}
                 {data?.map((c: any) => {
                   const dl = daysUntil(c.current_expiry_date);
                   return (
                     <tr key={c.id} className="hover:bg-accent/30">
+                      <td className="px-3 py-3"><Checkbox
+                        checked={selected.has(c.id)}
+                        onCheckedChange={(v) => {
+                          const n = new Set(selected);
+                          if (v) n.add(c.id); else n.delete(c.id);
+                          setSelected(n);
+                        }}
+                      /></td>
                       <td className="px-4 py-3 font-mono text-xs">
                         <Link to="/customers/$id" params={{ id: c.id }} className="text-primary hover:underline">{c.customer_code}</Link>
                       </td>
