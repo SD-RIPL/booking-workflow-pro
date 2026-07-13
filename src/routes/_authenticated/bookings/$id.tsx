@@ -343,8 +343,8 @@ function KycCard({
         kyc_verification: status,
         aadhaar_no: aadhaar.trim(),
       },
-      "deposit",
-      "KYC saved — Security Deposit unlocked",
+      done ? null : "deposit",
+      done ? "KYC updated" : "KYC saved — Security Deposit unlocked",
     );
     setSaving(false);
   }
@@ -454,7 +454,7 @@ function DepositCard({
       fields.cod_txn_id = codTxn.trim();
       fields.cod_received_on = codReceivedOn;
     }
-    const ok = await save(fields, "router_config", "Deposit saved — Customer created, Router Config unlocked");
+    const ok = await save(fields, done ? null : "router_config", done ? "Deposit updated" : "Deposit saved — Customer created, Router Config unlocked");
     setSaving(false);
     if (ok) toast.info("Customer record generated automatically");
   }
@@ -639,8 +639,8 @@ function RouterConfigCard({
         router_imei_mac: f.router_imei_mac.trim(),
         configuration_date: new Date().toISOString().slice(0, 10),
       },
-      "dispatch",
-      "Router Configuration saved — Dispatch unlocked",
+      done ? null : "dispatch",
+      done ? "Router config updated" : "Router Configuration saved — Dispatch unlocked",
     );
     setSaving(false);
   }
@@ -726,7 +726,7 @@ function DispatchCard({
       fields.delivery_date = deliveryDate;
       fields.dispatched_at = deliveryDate;
     }
-    const advance = status === "delivered" ? ("activation" as Stage) : null;
+    const advance: Stage | null = done ? null : (status === "delivered" ? "activation" : null);
     await save(
       fields,
       advance,
@@ -824,8 +824,8 @@ function ActivationCard({
         activation_status: status,
         activation_notes: notes.trim(),
       },
-      "completed",
-      "Booking workflow completed ✓",
+      done ? null : "completed",
+      done ? "Activation updated" : "Booking workflow completed ✓",
     );
     setSaving(false);
   }
