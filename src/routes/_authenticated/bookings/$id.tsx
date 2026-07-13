@@ -731,7 +731,44 @@ function RouterConfigCard({
 
   return (
     <StageCard step={4} title="Router Configuration" locked={locked} done={done}>
+      {!done && (
+        <div className="rounded-md border bg-muted/40 p-3 mb-4 space-y-3">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Pick from Stock</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Field label="Available SIM (from stock) *">
+              <Select value={pickedSim} onValueChange={onPickSim} disabled={done && !editMode}>
+                <SelectTrigger><SelectValue placeholder="Choose a SIM in stock…" /></SelectTrigger>
+                <SelectContent>
+                  {stockSims.length === 0 && <div className="px-2 py-1.5 text-xs text-muted-foreground">No SIMs available. Add stock in SIM Management.</div>}
+                  {stockSims.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.sim_number} · {s.company?.toUpperCase()} · Pkt {s.packet_number ?? "—"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Available Router (from stock) *">
+              <Select value={pickedRouter} onValueChange={onPickRouter} disabled={done && !editMode}>
+                <SelectTrigger><SelectValue placeholder="Choose a Router in stock…" /></SelectTrigger>
+                <SelectContent>
+                  {stockRouters.length === 0 && <div className="px-2 py-1.5 text-xs text-muted-foreground">No routers available. Add stock in Router Management.</div>}
+                  {stockRouters.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.serial_number} · {r.model ?? "—"}{r.condition === "refurbished" ? " · Refurbished" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Selecting from stock auto-fills the fields below and reserves the SIM/Router so it can't be assigned to another customer.
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
         <Field label="Router SSID *"><Input value={f.router_ssid} onChange={set("router_ssid")} disabled={done && !editMode} /></Field>
         <Field label="Router Password *"><Input value={f.router_password} onChange={set("router_password")} disabled={done && !editMode} /></Field>
         <Field label="Router Company *"><Input value={f.router_company} onChange={set("router_company")} disabled={done && !editMode} /></Field>
