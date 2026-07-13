@@ -61,11 +61,16 @@ function AuthPage() {
     else toast.success("Invite accepted — access granted");
   }
 
+  async function ensureProfile(name?: string) {
+    await (supabase as any).rpc("ensure_profile", { _full_name: name ?? null });
+  }
+
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { setLoading(false); return toast.error(error.message); }
+    await ensureProfile();
     await redeemIfNeeded();
     setLoading(false);
     toast.success("Welcome back");
@@ -86,6 +91,7 @@ function AuthPage() {
     if (error) { setLoading(false); return toast.error(error.message); }
     // If session was created immediately (auto-confirm), redeem + go to dashboard.
     if (data.session) {
+      await ensureProfile(fullName);
       await redeemIfNeeded();
       setLoading(false);
       toast.success("Account created");
