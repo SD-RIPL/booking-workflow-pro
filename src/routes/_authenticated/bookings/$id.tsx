@@ -117,18 +117,34 @@ function BookingDetail() {
   }
 
   return (
-    <>
+    <EditModeCtx.Provider value={editMode}>
       <PageHeader
         title={`Booking ${b.booking_code}`}
         description="Enterprise workflow — each stage unlocks only after the previous Save succeeds"
         actions={
-          <Button variant="outline" onClick={() => navigate({ to: "/bookings" })}>
-            Back to list
-          </Button>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button
+                variant={editMode ? "default" : "outline"}
+                onClick={() => setEditMode((v) => !v)}
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                {editMode ? "Editing — Click to Lock" : "Admin Edit"}
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => navigate({ to: "/bookings" })}>
+              Back to list
+            </Button>
+          </div>
         }
       />
 
       <div className="p-6 space-y-4 max-w-5xl">
+        {editMode && (
+          <div className="rounded-md border border-amber-300 bg-amber-50 text-amber-900 px-3 py-2 text-sm">
+            Admin edit mode is ON — saved stages are unlocked. Changes here won't advance the workflow.
+          </div>
+        )}
         {/* Progress rail */}
         <Card className="p-4">
           <div className="flex items-center gap-2 flex-wrap">
@@ -185,9 +201,10 @@ function BookingDetail() {
         {/* Stage 6 – Activation */}
         <ActivationCard b={b} locked={currentIdx < 5} done={currentIdx > 5} save={save} />
       </div>
-    </>
+    </EditModeCtx.Provider>
   );
 }
+
 
 // ============================================================
 // Section shells
