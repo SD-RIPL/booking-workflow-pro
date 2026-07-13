@@ -70,6 +70,14 @@ function BookingDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [editMode, setEditMode] = useState(false);
+  const { data: userRes } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: async () => (await supabase.auth.getUser()).data.user,
+  });
+  const access = useAccess(userRes?.id);
+  const isAdmin = access.data?.role === "admin" || access.data?.role === "super_admin";
+
 
   const { data: b, isLoading } = useQuery({
     queryKey: ["booking", id],
