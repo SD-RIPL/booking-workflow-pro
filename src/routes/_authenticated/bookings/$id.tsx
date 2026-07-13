@@ -16,9 +16,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { logAudit } from "@/lib/crm";
-import { Check, Lock, ChevronRight } from "lucide-react";
+import { Check, Lock, ChevronRight, Pencil } from "lucide-react";
+import { useAccess } from "@/lib/access";
+
+const EditModeCtx = createContext(false);
+const useEditMode = () => useContext(EditModeCtx);
 
 export const Route = createFileRoute("/_authenticated/bookings/$id")({
   ssr: false,
@@ -66,6 +70,14 @@ function BookingDetail() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [editMode, setEditMode] = useState(false);
+  const { data: userRes } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: async () => (await supabase.auth.getUser()).data.user,
+  });
+  const access = useAccess(userRes?.id);
+  const isAdmin = access.data?.role === "admin" || access.data?.role === "super_admin";
+
 
   const { data: b, isLoading } = useQuery({
     queryKey: ["booking", id],
@@ -105,18 +117,34 @@ function BookingDetail() {
   }
 
   return (
-    <>
+    <EditModeCtx.Provider value={editMode}>
       <PageHeader
         title={`Booking ${b.booking_code}`}
         description="Enterprise workflow — each stage unlocks only after the previous Save succeeds"
         actions={
-          <Button variant="outline" onClick={() => navigate({ to: "/bookings" })}>
-            Back to list
-          </Button>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button
+                variant={editMode ? "default" : "outline"}
+                onClick={() => setEditMode((v) => !v)}
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                {editMode ? "Editing — Click to Lock" : "Admin Edit"}
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => navigate({ to: "/bookings" })}>
+              Back to list
+            </Button>
+          </div>
         }
       />
 
       <div className="p-6 space-y-4 max-w-5xl">
+        {editMode && (
+          <div className="rounded-md border border-amber-300 bg-amber-50 text-amber-900 px-3 py-2 text-sm">
+            Admin edit mode is ON — saved stages are unlocked. Changes here won't advance the workflow.
+          </div>
+        )}
         {/* Progress rail */}
         <Card className="p-4">
           <div className="flex items-center gap-2 flex-wrap">
@@ -173,9 +201,10 @@ function BookingDetail() {
         {/* Stage 6 – Activation */}
         <ActivationCard b={b} locked={currentIdx < 5} done={currentIdx > 5} save={save} />
       </div>
-    </>
+    </EditModeCtx.Provider>
   );
 }
+
 
 // ============================================================
 // Section shells
@@ -314,6 +343,7 @@ function KycCard({
 }) {
   const [status, setStatus] = useState<string>((b.kyc_verification as string) ?? "");
   const [aadhaar, setAadhaar] = useState<string>((b.aadhaar_no as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -328,7 +358,7 @@ function KycCard({
     return m;
   }, [status, aadhaar]);
 
-  const canSave = !locked && !done && status === "approved" && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && status === "approved" && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -338,8 +368,8 @@ function KycCard({
         kyc_verification: status,
         aadhaar_no: aadhaar.trim(),
       },
-      "deposit",
-      "KYC saved — Security Deposit unlocked",
+      done ? null : "deposit",
+      done ? "KYC updated" : "KYC saved — Security Deposit unlocked",
     );
     setSaving(false);
   }
@@ -348,7 +378,7 @@ function KycCard({
     <StageCard step={2} title="KYC Verification" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -364,7 +394,7 @@ function KycCard({
               value={aadhaar}
               onChange={(e) => setAadhaar(e.target.value)}
               placeholder="12-digit Aadhaar"
-              disabled={done}
+              disabled={done && !editMode}
             />
           </Field>
         )}
@@ -374,14 +404,14 @@ function KycCard({
           </div>
         )}
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save KYC"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -412,6 +442,7 @@ function DepositCard({
   const [codDate, setCodDate] = useState<string>((b.cod_date as string) ?? "");
   const [codTxn, setCodTxn] = useState<string>((b.cod_txn_id as string) ?? "");
   const [codReceivedOn, setCodReceivedOn] = useState<string>((b.cod_received_on as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
 
   const missing = useMemo(() => {
@@ -431,7 +462,7 @@ function DepositCard({
   }, [status, amount, txn, receivedOn, codAmount, codDate, codTxn, codReceivedOn]);
 
   const canSave =
-    !locked && !done && (status === "received" || status === "cod") && missing.length === 0;
+    !locked && (!done || editMode) && (status === "received" || status === "cod") && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -448,7 +479,7 @@ function DepositCard({
       fields.cod_txn_id = codTxn.trim();
       fields.cod_received_on = codReceivedOn;
     }
-    const ok = await save(fields, "router_config", "Deposit saved — Customer created, Router Config unlocked");
+    const ok = await save(fields, done ? null : "router_config", done ? "Deposit updated" : "Deposit saved — Customer created, Router Config unlocked");
     setSaving(false);
     if (ok) toast.info("Customer record generated automatically");
   }
@@ -459,7 +490,7 @@ function DepositCard({
     <StageCard step={3} title="Security Deposit" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Security Deposit Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -474,7 +505,7 @@ function DepositCard({
         {status === "received" && (
           <>
             <Field label="Deposit Amount *">
-              <Select value={amount} onValueChange={setAmount} disabled={done}>
+              <Select value={amount} onValueChange={setAmount} disabled={done && !editMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />
                 </SelectTrigger>
@@ -487,10 +518,10 @@ function DepositCard({
             {amount && (
               <>
                 <Field label="SD Transaction ID *">
-                  <Input value={txn} onChange={(e) => setTxn(e.target.value)} disabled={done} />
+                  <Input value={txn} onChange={(e) => setTxn(e.target.value)} disabled={done && !editMode} />
                 </Field>
                 <Field label="Received On *">
-                  <Select value={receivedOn} onValueChange={setReceivedOn} disabled={done}>
+                  <Select value={receivedOn} onValueChange={setReceivedOn} disabled={done && !editMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -509,7 +540,7 @@ function DepositCard({
                     value={sdDate}
                     onChange={(e) => setSdDate(e.target.value)}
                     max={today}
-                    disabled={done}
+                    disabled={done && !editMode}
                   />
                 </Field>
               </>
@@ -524,7 +555,7 @@ function DepositCard({
                 type="number"
                 value={codAmount}
                 onChange={(e) => setCodAmount(e.target.value)}
-                disabled={done}
+                disabled={done && !editMode}
               />
             </Field>
             <Field label="COD Date *">
@@ -533,14 +564,14 @@ function DepositCard({
                 value={codDate}
                 onChange={(e) => setCodDate(e.target.value)}
                 max={today}
-                disabled={done}
+                disabled={done && !editMode}
               />
             </Field>
             <Field label="Transaction ID *">
-              <Input value={codTxn} onChange={(e) => setCodTxn(e.target.value)} disabled={done} />
+              <Input value={codTxn} onChange={(e) => setCodTxn(e.target.value)} disabled={done && !editMode} />
             </Field>
             <Field label="Received On *">
-              <Select value={codReceivedOn} onValueChange={setCodReceivedOn} disabled={done}>
+              <Select value={codReceivedOn} onValueChange={setCodReceivedOn} disabled={done && !editMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -560,14 +591,14 @@ function DepositCard({
         )}
       </div>
 
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save Security Deposit"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -598,9 +629,55 @@ function RouterConfigCard({
     router_sim_no: (b.router_sim_no as string) ?? "",
     router_imei_mac: (b.router_imei_mac as string) ?? "",
   });
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
+  const [pickedSim, setPickedSim] = useState<string>((b.sim_id as string) ?? "");
+  const [pickedRouter, setPickedRouter] = useState<string>((b.router_id as string) ?? "");
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF({ ...f, [k]: e.target.value });
+
+  // Available stock — SIMs (available) + Routers (in_stock). Include currently-linked ids so picker shows them.
+  const { data: stockSims = [] } = useQuery({
+    queryKey: ["stock-sims", b.sim_id],
+    queryFn: async () => {
+      const { data } = await supabase.from("sims")
+        .select("id,sim_number,packet_number,company,status,assigned_customer_id")
+        .is("deleted_at", null)
+        .or(`status.eq.available,id.eq.${b.sim_id ?? "00000000-0000-0000-0000-000000000000"}`);
+      return data ?? [];
+    },
+  });
+  const { data: stockRouters = [] } = useQuery({
+    queryKey: ["stock-routers", b.router_id],
+    queryFn: async () => {
+      const { data } = await supabase.from("routers")
+        .select("id,serial_number,model,vendor,status,condition,assigned_customer_id")
+        .is("deleted_at", null)
+        .or(`status.eq.in_stock,id.eq.${b.router_id ?? "00000000-0000-0000-0000-000000000000"}`);
+      return data ?? [];
+    },
+  });
+
+  function onPickSim(id: string) {
+    setPickedSim(id);
+    const s = stockSims.find((x: any) => x.id === id);
+    if (s) setF((prev) => ({
+      ...prev,
+      sim_company: (s.company || "").toLowerCase(),
+      sim_packet_no: s.packet_number ?? prev.sim_packet_no,
+      router_sim_no: s.sim_number ?? prev.router_sim_no,
+    }));
+  }
+  function onPickRouter(id: string) {
+    setPickedRouter(id);
+    const r = stockRouters.find((x: any) => x.id === id);
+    if (r) setF((prev) => ({
+      ...prev,
+      router_company: r.vendor ?? prev.router_company,
+      router_model_no: r.model ?? prev.router_model_no,
+      router_imei_mac: r.serial_number ?? prev.router_imei_mac,
+    }));
+  }
 
   const missing = useMemo(() => {
     const m: string[] = [];
@@ -612,14 +689,27 @@ function RouterConfigCard({
     if (!f.sim_packet_no.trim()) m.push("SIM Packet Number");
     if (!f.router_sim_no.trim()) m.push("SIM Number");
     if (!f.router_imei_mac.trim()) m.push("Router IMEI Number");
+    if (!done && !pickedSim) m.push("Pick a SIM from stock");
+    if (!done && !pickedRouter) m.push("Pick a Router from stock");
     return m;
-  }, [f]);
+  }, [f, done, pickedSim, pickedRouter]);
 
-  const canSave = !locked && !done && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
     setSaving(true);
+    // Reserve SIM/router in stock atomically (only on initial completion, not admin edits)
+    if (!done && pickedSim && pickedRouter && (b.sim_id !== pickedSim || b.router_id !== pickedRouter)) {
+      const { error: rpcErr } = await (supabase as any).rpc("assign_sim_router_to_booking", {
+        _booking: b.id, _sim: pickedSim, _router: pickedRouter,
+      });
+      if (rpcErr) {
+        setSaving(false);
+        toast.error(rpcErr.message);
+        return;
+      }
+    }
     await save(
       {
         router_ssid: f.router_ssid.trim(),
@@ -632,21 +722,59 @@ function RouterConfigCard({
         router_imei_mac: f.router_imei_mac.trim(),
         configuration_date: new Date().toISOString().slice(0, 10),
       },
-      "dispatch",
-      "Router Configuration saved — Dispatch unlocked",
+      done ? null : "dispatch",
+      done ? "Router config updated" : "Router Configuration saved — Dispatch unlocked",
     );
     setSaving(false);
   }
 
+
   return (
     <StageCard step={4} title="Router Configuration" locked={locked} done={done}>
+      {!done && (
+        <div className="rounded-md border bg-muted/40 p-3 mb-4 space-y-3">
+          <div className="text-xs font-semibold uppercase text-muted-foreground">Pick from Stock</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <Field label="Available SIM (from stock) *">
+              <Select value={pickedSim} onValueChange={onPickSim} disabled={done && !editMode}>
+                <SelectTrigger><SelectValue placeholder="Choose a SIM in stock…" /></SelectTrigger>
+                <SelectContent>
+                  {stockSims.length === 0 && <div className="px-2 py-1.5 text-xs text-muted-foreground">No SIMs available. Add stock in SIM Management.</div>}
+                  {stockSims.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.sim_number} · {s.company?.toUpperCase()} · Pkt {s.packet_number ?? "—"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Available Router (from stock) *">
+              <Select value={pickedRouter} onValueChange={onPickRouter} disabled={done && !editMode}>
+                <SelectTrigger><SelectValue placeholder="Choose a Router in stock…" /></SelectTrigger>
+                <SelectContent>
+                  {stockRouters.length === 0 && <div className="px-2 py-1.5 text-xs text-muted-foreground">No routers available. Add stock in Router Management.</div>}
+                  {stockRouters.map((r: any) => (
+                    <SelectItem key={r.id} value={r.id}>
+                      {r.serial_number} · {r.model ?? "—"}{r.condition === "refurbished" ? " · Refurbished" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Selecting from stock auto-fills the fields below and reserves the SIM/Router so it can't be assigned to another customer.
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label="Router SSID *"><Input value={f.router_ssid} onChange={set("router_ssid")} disabled={done} /></Field>
-        <Field label="Router Password *"><Input value={f.router_password} onChange={set("router_password")} disabled={done} /></Field>
-        <Field label="Router Company *"><Input value={f.router_company} onChange={set("router_company")} disabled={done} /></Field>
-        <Field label="Router Model Number *"><Input value={f.router_model_no} onChange={set("router_model_no")} disabled={done} /></Field>
+
+        <Field label="Router SSID *"><Input value={f.router_ssid} onChange={set("router_ssid")} disabled={done && !editMode} /></Field>
+        <Field label="Router Password *"><Input value={f.router_password} onChange={set("router_password")} disabled={done && !editMode} /></Field>
+        <Field label="Router Company *"><Input value={f.router_company} onChange={set("router_company")} disabled={done && !editMode} /></Field>
+        <Field label="Router Model Number *"><Input value={f.router_model_no} onChange={set("router_model_no")} disabled={done && !editMode} /></Field>
         <Field label="SIM Company *">
-          <Select value={f.sim_company} onValueChange={(v) => setF({ ...f, sim_company: v })} disabled={done}>
+          <Select value={f.sim_company} onValueChange={(v) => setF({ ...f, sim_company: v })} disabled={done && !editMode}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="airtel">Airtel</SelectItem>
@@ -654,18 +782,18 @@ function RouterConfigCard({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="SIM Packet Number *"><Input value={f.sim_packet_no} onChange={set("sim_packet_no")} disabled={done} /></Field>
-        <Field label="SIM Number *"><Input value={f.router_sim_no} onChange={set("router_sim_no")} disabled={done} /></Field>
-        <Field label="Router IMEI Number *"><Input value={f.router_imei_mac} onChange={set("router_imei_mac")} disabled={done} /></Field>
+        <Field label="SIM Packet Number *"><Input value={f.sim_packet_no} onChange={set("sim_packet_no")} disabled={done && !editMode} /></Field>
+        <Field label="SIM Number *"><Input value={f.router_sim_no} onChange={set("router_sim_no")} disabled={done && !editMode} /></Field>
+        <Field label="Router IMEI Number *"><Input value={f.router_imei_mac} onChange={set("router_imei_mac")} disabled={done && !editMode} /></Field>
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save Configuration"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -691,6 +819,7 @@ function DispatchCard({
   const [scheduleDate, setScheduleDate] = useState<string>((b.dispatch_schedule_date as string) ?? "");
   const [pickupDate, setPickupDate] = useState<string>((b.pickup_date as string) ?? "");
   const [deliveryDate, setDeliveryDate] = useState<string>((b.delivery_date as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -705,7 +834,7 @@ function DispatchCard({
   }, [status, configDate, scheduleDate, pickupDate, deliveryDate]);
 
   // Only "delivered" advances the stage. Other statuses save progress in-place.
-  const canSave = !locked && !done && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -718,7 +847,7 @@ function DispatchCard({
       fields.delivery_date = deliveryDate;
       fields.dispatched_at = deliveryDate;
     }
-    const advance = status === "delivered" ? ("activation" as Stage) : null;
+    const advance: Stage | null = done ? null : (status === "delivered" ? "activation" : null);
     await save(
       fields,
       advance,
@@ -731,7 +860,7 @@ function DispatchCard({
     <StageCard step={5} title="Dispatch" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Dispatch Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="router_configured">Router Configured</SelectItem>
@@ -743,33 +872,33 @@ function DispatchCard({
         </Field>
         {status === "router_configured" && (
           <Field label="Configuration Date *">
-            <Input type="date" value={configDate} onChange={(e) => setConfigDate(e.target.value)} max={today} disabled={done} />
+            <Input type="date" value={configDate} onChange={(e) => setConfigDate(e.target.value)} max={today} disabled={done && !editMode} />
           </Field>
         )}
         {status === "dispatch_scheduled" && (
           <Field label="Dispatch Schedule Date *">
-            <Input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} disabled={done} />
+            <Input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} disabled={done && !editMode} />
           </Field>
         )}
         {status === "picked_up" && (
           <Field label="Pickup Date *">
-            <Input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} max={today} disabled={done} />
+            <Input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} max={today} disabled={done && !editMode} />
           </Field>
         )}
         {status === "delivered" && (
           <Field label="Delivery Date *">
-            <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} max={today} disabled={done} />
+            <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} max={today} disabled={done && !editMode} />
           </Field>
         )}
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : status === "delivered" ? "Save Dispatch & Deliver" : "Save Dispatch"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -794,6 +923,7 @@ function ActivationCard({
   const [date, setDate] = useState<string>((b.activation_date as string) ?? today);
   const [status, setStatus] = useState<string>((b.activation_status as string) ?? "");
   const [notes, setNotes] = useState<string>((b.activation_notes as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
 
   const missing = useMemo(() => {
@@ -804,7 +934,7 @@ function ActivationCard({
     return m;
   }, [date, status, notes]);
 
-  const canSave = !locked && !done && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -815,8 +945,8 @@ function ActivationCard({
         activation_status: status,
         activation_notes: notes.trim(),
       },
-      "completed",
-      "Booking workflow completed ✓",
+      done ? null : "completed",
+      done ? "Activation updated" : "Booking workflow completed ✓",
     );
     setSaving(false);
   }
@@ -825,10 +955,10 @@ function ActivationCard({
     <StageCard step={6} title="Activation" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Activation Date *">
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} max={today} disabled={done} />
+          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} max={today} disabled={done && !editMode} />
         </Field>
         <Field label="Activation Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="active">Active</SelectItem>
@@ -838,17 +968,17 @@ function ActivationCard({
           </Select>
         </Field>
         <Field label="Notes *" full>
-          <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} disabled={done} />
+          <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} disabled={done && !editMode} />
         </Field>
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save Activation"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>

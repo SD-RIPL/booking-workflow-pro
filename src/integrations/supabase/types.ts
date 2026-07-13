@@ -1262,6 +1262,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_sim_router_to_booking: {
+        Args: { _booking: string; _router: string; _sim: string }
+        Returns: undefined
+      }
+      ensure_profile: {
+        Args: { _full_name?: string }
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          phone: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       grant_role_by_email: {
         Args: {
           p_email: string
@@ -1310,6 +1333,10 @@ export type Database = {
       refresh_customer_status: { Args: never; Returns: number }
       refresh_customer_statuses: { Args: never; Returns: number }
       restore_row: { Args: { _id: string; _table: string }; Returns: boolean }
+      return_router_and_deactivate_sim: {
+        Args: { _condition?: string; _customer: string; _reason?: string }
+        Returns: Json
+      }
       revoke_role: {
         Args: {
           p_role: Database["public"]["Enums"]["app_role"]
