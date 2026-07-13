@@ -631,8 +631,53 @@ function RouterConfigCard({
   });
   const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
+  const [pickedSim, setPickedSim] = useState<string>((b.sim_id as string) ?? "");
+  const [pickedRouter, setPickedRouter] = useState<string>((b.router_id as string) ?? "");
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF({ ...f, [k]: e.target.value });
+
+  // Available stock — SIMs (available) + Routers (in_stock). Include currently-linked ids so picker shows them.
+  const { data: stockSims = [] } = useQuery({
+    queryKey: ["stock-sims", b.sim_id],
+    queryFn: async () => {
+      const { data } = await supabase.from("sims")
+        .select("id,sim_number,packet_number,company,status,assigned_customer_id")
+        .is("deleted_at", null)
+        .or(`status.eq.available,id.eq.${b.sim_id ?? "00000000-0000-0000-0000-000000000000"}`);
+      return data ?? [];
+    },
+  });
+  const { data: stockRouters = [] } = useQuery({
+    queryKey: ["stock-routers", b.router_id],
+    queryFn: async () => {
+      const { data } = await supabase.from("routers")
+        .select("id,serial_number,model,vendor,status,condition,assigned_customer_id")
+        .is("deleted_at", null)
+        .or(`status.eq.in_stock,id.eq.${b.router_id ?? "00000000-0000-0000-0000-000000000000"}`);
+      return data ?? [];
+    },
+  });
+
+  function onPickSim(id: string) {
+    setPickedSim(id);
+    const s = stockSims.find((x: any) => x.id === id);
+    if (s) setF((prev) => ({
+      ...prev,
+      sim_company: (s.company || "").toLowerCase(),
+      sim_packet_no: s.packet_number ?? prev.sim_packet_no,
+      router_sim_no: s.sim_number ?? prev.router_sim_no,
+    }));
+  }
+  function onPickRouter(id: string) {
+    setPickedRouter(id);
+    const r = stockRouters.find((x: any) => x.id === id);
+    if (r) setF((prev) => ({
+      ...prev,
+      router_company: r.vendor ?? prev.router_company,
+      router_model_no: r.model ?? prev.router_model_no,
+      router_imei_mac: r.serial_number ?? prev.router_imei_mac,
+    }));
+  }
 
   const missing = useMemo(() => {
     const m: string[] = [];
@@ -644,14 +689,27 @@ function RouterConfigCard({
     if (!f.sim_packet_no.trim()) m.push("SIM Packet Number");
     if (!f.router_sim_no.trim()) m.push("SIM Number");
     if (!f.router_imei_mac.trim()) m.push("Router IMEI Number");
+    if (!done && !pickedSim) m.push("Pick a SIM from stock");
+    if (!done && !pickedRouter) m.push("Pick a Router from stock");
     return m;
-  }, [f]);
+  }, [f, done, pickedSim, pickedRouter]);
 
   const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
     setSaving(true);
+    // Reserve SIM/router in stock atomically (only on initial completion, not admin edits)
+    if (!done && pickedSim && pickedRouter && (b.sim_id !== pickedSim || b.router_id !== pickedRouter)) {
+      const { error: rpcErr } = await (supabase as any).rpc("assign_sim_router_to_booking", {
+        _booking: b.id, _sim: pickedSim, _router: pickedRouter,
+      });
+      if (rpcErr) {
+        setSaving(false);
+        toast.error(rpcErr.message);
+        return;
+      }
+    }
     await save(
       {
         router_ssid: f.router_ssid.trim(),
@@ -669,6 +727,7 @@ function RouterConfigCard({
     );
     setSaving(false);
   }
+
 
   return (
     <StageCard step={4} title="Router Configuration" locked={locked} done={done}>
