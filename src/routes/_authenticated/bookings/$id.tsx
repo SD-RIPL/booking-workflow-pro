@@ -16,9 +16,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { logAudit } from "@/lib/crm";
-import { Check, Lock, ChevronRight } from "lucide-react";
+import { Check, Lock, ChevronRight, Pencil } from "lucide-react";
+import { useAccess } from "@/lib/access";
+
+const EditModeCtx = createContext(false);
+const useEditMode = () => useContext(EditModeCtx);
 
 export const Route = createFileRoute("/_authenticated/bookings/$id")({
   ssr: false,
