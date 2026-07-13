@@ -328,7 +328,7 @@ function KycCard({
     return m;
   }, [status, aadhaar]);
 
-  const canSave = !locked && !done && status === "approved" && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && status === "approved" && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -348,7 +348,7 @@ function KycCard({
     <StageCard step={2} title="KYC Verification" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -364,7 +364,7 @@ function KycCard({
               value={aadhaar}
               onChange={(e) => setAadhaar(e.target.value)}
               placeholder="12-digit Aadhaar"
-              disabled={done}
+              disabled={done && !editMode}
             />
           </Field>
         )}
@@ -374,14 +374,14 @@ function KycCard({
           </div>
         )}
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save KYC"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -431,7 +431,7 @@ function DepositCard({
   }, [status, amount, txn, receivedOn, codAmount, codDate, codTxn, codReceivedOn]);
 
   const canSave =
-    !locked && !done && (status === "received" || status === "cod") && missing.length === 0;
+    !locked && (!done || editMode) && (status === "received" || status === "cod") && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -459,7 +459,7 @@ function DepositCard({
     <StageCard step={3} title="Security Deposit" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Security Deposit Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -474,7 +474,7 @@ function DepositCard({
         {status === "received" && (
           <>
             <Field label="Deposit Amount *">
-              <Select value={amount} onValueChange={setAmount} disabled={done}>
+              <Select value={amount} onValueChange={setAmount} disabled={done && !editMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select amount" />
                 </SelectTrigger>
@@ -487,10 +487,10 @@ function DepositCard({
             {amount && (
               <>
                 <Field label="SD Transaction ID *">
-                  <Input value={txn} onChange={(e) => setTxn(e.target.value)} disabled={done} />
+                  <Input value={txn} onChange={(e) => setTxn(e.target.value)} disabled={done && !editMode} />
                 </Field>
                 <Field label="Received On *">
-                  <Select value={receivedOn} onValueChange={setReceivedOn} disabled={done}>
+                  <Select value={receivedOn} onValueChange={setReceivedOn} disabled={done && !editMode}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
@@ -509,7 +509,7 @@ function DepositCard({
                     value={sdDate}
                     onChange={(e) => setSdDate(e.target.value)}
                     max={today}
-                    disabled={done}
+                    disabled={done && !editMode}
                   />
                 </Field>
               </>
@@ -524,7 +524,7 @@ function DepositCard({
                 type="number"
                 value={codAmount}
                 onChange={(e) => setCodAmount(e.target.value)}
-                disabled={done}
+                disabled={done && !editMode}
               />
             </Field>
             <Field label="COD Date *">
@@ -533,14 +533,14 @@ function DepositCard({
                 value={codDate}
                 onChange={(e) => setCodDate(e.target.value)}
                 max={today}
-                disabled={done}
+                disabled={done && !editMode}
               />
             </Field>
             <Field label="Transaction ID *">
-              <Input value={codTxn} onChange={(e) => setCodTxn(e.target.value)} disabled={done} />
+              <Input value={codTxn} onChange={(e) => setCodTxn(e.target.value)} disabled={done && !editMode} />
             </Field>
             <Field label="Received On *">
-              <Select value={codReceivedOn} onValueChange={setCodReceivedOn} disabled={done}>
+              <Select value={codReceivedOn} onValueChange={setCodReceivedOn} disabled={done && !editMode}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -560,14 +560,14 @@ function DepositCard({
         )}
       </div>
 
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save Security Deposit"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -615,7 +615,7 @@ function RouterConfigCard({
     return m;
   }, [f]);
 
-  const canSave = !locked && !done && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -641,12 +641,12 @@ function RouterConfigCard({
   return (
     <StageCard step={4} title="Router Configuration" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Field label="Router SSID *"><Input value={f.router_ssid} onChange={set("router_ssid")} disabled={done} /></Field>
-        <Field label="Router Password *"><Input value={f.router_password} onChange={set("router_password")} disabled={done} /></Field>
-        <Field label="Router Company *"><Input value={f.router_company} onChange={set("router_company")} disabled={done} /></Field>
-        <Field label="Router Model Number *"><Input value={f.router_model_no} onChange={set("router_model_no")} disabled={done} /></Field>
+        <Field label="Router SSID *"><Input value={f.router_ssid} onChange={set("router_ssid")} disabled={done && !editMode} /></Field>
+        <Field label="Router Password *"><Input value={f.router_password} onChange={set("router_password")} disabled={done && !editMode} /></Field>
+        <Field label="Router Company *"><Input value={f.router_company} onChange={set("router_company")} disabled={done && !editMode} /></Field>
+        <Field label="Router Model Number *"><Input value={f.router_model_no} onChange={set("router_model_no")} disabled={done && !editMode} /></Field>
         <Field label="SIM Company *">
-          <Select value={f.sim_company} onValueChange={(v) => setF({ ...f, sim_company: v })} disabled={done}>
+          <Select value={f.sim_company} onValueChange={(v) => setF({ ...f, sim_company: v })} disabled={done && !editMode}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="airtel">Airtel</SelectItem>
@@ -654,18 +654,18 @@ function RouterConfigCard({
             </SelectContent>
           </Select>
         </Field>
-        <Field label="SIM Packet Number *"><Input value={f.sim_packet_no} onChange={set("sim_packet_no")} disabled={done} /></Field>
-        <Field label="SIM Number *"><Input value={f.router_sim_no} onChange={set("router_sim_no")} disabled={done} /></Field>
-        <Field label="Router IMEI Number *"><Input value={f.router_imei_mac} onChange={set("router_imei_mac")} disabled={done} /></Field>
+        <Field label="SIM Packet Number *"><Input value={f.sim_packet_no} onChange={set("sim_packet_no")} disabled={done && !editMode} /></Field>
+        <Field label="SIM Number *"><Input value={f.router_sim_no} onChange={set("router_sim_no")} disabled={done && !editMode} /></Field>
+        <Field label="Router IMEI Number *"><Input value={f.router_imei_mac} onChange={set("router_imei_mac")} disabled={done && !editMode} /></Field>
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save Configuration"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -705,7 +705,7 @@ function DispatchCard({
   }, [status, configDate, scheduleDate, pickupDate, deliveryDate]);
 
   // Only "delivered" advances the stage. Other statuses save progress in-place.
-  const canSave = !locked && !done && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -731,7 +731,7 @@ function DispatchCard({
     <StageCard step={5} title="Dispatch" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Dispatch Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="router_configured">Router Configured</SelectItem>
@@ -743,33 +743,33 @@ function DispatchCard({
         </Field>
         {status === "router_configured" && (
           <Field label="Configuration Date *">
-            <Input type="date" value={configDate} onChange={(e) => setConfigDate(e.target.value)} max={today} disabled={done} />
+            <Input type="date" value={configDate} onChange={(e) => setConfigDate(e.target.value)} max={today} disabled={done && !editMode} />
           </Field>
         )}
         {status === "dispatch_scheduled" && (
           <Field label="Dispatch Schedule Date *">
-            <Input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} disabled={done} />
+            <Input type="date" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} disabled={done && !editMode} />
           </Field>
         )}
         {status === "picked_up" && (
           <Field label="Pickup Date *">
-            <Input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} max={today} disabled={done} />
+            <Input type="date" value={pickupDate} onChange={(e) => setPickupDate(e.target.value)} max={today} disabled={done && !editMode} />
           </Field>
         )}
         {status === "delivered" && (
           <Field label="Delivery Date *">
-            <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} max={today} disabled={done} />
+            <Input type="date" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} max={today} disabled={done && !editMode} />
           </Field>
         )}
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : status === "delivered" ? "Save Dispatch & Deliver" : "Save Dispatch"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
@@ -804,7 +804,7 @@ function ActivationCard({
     return m;
   }, [date, status, notes]);
 
-  const canSave = !locked && !done && missing.length === 0;
+  const canSave = !locked && (!done || editMode) && missing.length === 0;
 
   async function onSave() {
     if (!canSave) return;
@@ -825,10 +825,10 @@ function ActivationCard({
     <StageCard step={6} title="Activation" locked={locked} done={done}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label="Activation Date *">
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} max={today} disabled={done} />
+          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} max={today} disabled={done && !editMode} />
         </Field>
         <Field label="Activation Status *">
-          <Select value={status} onValueChange={setStatus} disabled={done}>
+          <Select value={status} onValueChange={setStatus} disabled={done && !editMode}>
             <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="active">Active</SelectItem>
@@ -838,17 +838,17 @@ function ActivationCard({
           </Select>
         </Field>
         <Field label="Notes *" full>
-          <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} disabled={done} />
+          <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} disabled={done && !editMode} />
         </Field>
       </div>
-      {!done && (
+      {(!done || editMode) && (
         <div className="flex justify-end gap-2 mt-4">
           <Button disabled={!canSave || saving} onClick={onSave}>
             {saving ? "Saving…" : "Save Activation"}
           </Button>
         </div>
       )}
-      {!done && missing.length > 0 && (
+      {(!done || editMode) && missing.length > 0 && (
         <div className="text-xs text-destructive mt-2">Required: {missing.join(", ")}</div>
       )}
     </StageCard>
