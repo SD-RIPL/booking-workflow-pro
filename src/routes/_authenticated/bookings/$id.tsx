@@ -318,6 +318,7 @@ function KycCard({
 }) {
   const [status, setStatus] = useState<string>((b.kyc_verification as string) ?? "");
   const [aadhaar, setAadhaar] = useState<string>((b.aadhaar_no as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -416,6 +417,7 @@ function DepositCard({
   const [codDate, setCodDate] = useState<string>((b.cod_date as string) ?? "");
   const [codTxn, setCodTxn] = useState<string>((b.cod_txn_id as string) ?? "");
   const [codReceivedOn, setCodReceivedOn] = useState<string>((b.cod_received_on as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
 
   const missing = useMemo(() => {
@@ -602,6 +604,7 @@ function RouterConfigCard({
     router_sim_no: (b.router_sim_no as string) ?? "",
     router_imei_mac: (b.router_imei_mac as string) ?? "",
   });
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF({ ...f, [k]: e.target.value });
@@ -695,6 +698,7 @@ function DispatchCard({
   const [scheduleDate, setScheduleDate] = useState<string>((b.dispatch_schedule_date as string) ?? "");
   const [pickupDate, setPickupDate] = useState<string>((b.pickup_date as string) ?? "");
   const [deliveryDate, setDeliveryDate] = useState<string>((b.delivery_date as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -798,6 +802,7 @@ function ActivationCard({
   const [date, setDate] = useState<string>((b.activation_date as string) ?? today);
   const [status, setStatus] = useState<string>((b.activation_status as string) ?? "");
   const [notes, setNotes] = useState<string>((b.activation_notes as string) ?? "");
+  const editMode = useEditMode();
   const [saving, setSaving] = useState(false);
 
   const missing = useMemo(() => {
