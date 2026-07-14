@@ -15,7 +15,15 @@ export const Route = createFileRoute("/_authenticated/chatbot")({
 
 function ChatbotPage() {
   const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      headers: async (): Promise<Record<string, string>> => {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      },
+    }),
   });
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);

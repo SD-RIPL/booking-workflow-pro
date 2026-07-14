@@ -3,7 +3,20 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/public/send-notifications")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const cronSecret = process.env.CRON_SECRET;
+        if (!cronSecret) {
+          return Response.json({ error: "Server not configured" }, { status: 500 });
+        }
+        const provided =
+          request.headers.get("x-cron-secret") ??
+          (request.headers.get("authorization")?.toLowerCase().startsWith("bearer ")
+            ? request.headers.get("authorization")!.slice(7).trim()
+            : null);
+        if (!provided || provided !== cronSecret) {
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const url = process.env.SUPABASE_URL;
         const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
         if (!url || !serviceKey) {

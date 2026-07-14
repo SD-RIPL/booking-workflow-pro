@@ -7,11 +7,42 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        // Require an authenticated staff session — this endpoint invokes admin-scoped tools.
+        const authHeader = request.headers.get("authorization") ?? request.headers.get("Authorization");
+        const token = authHeader?.toLowerCase().startsWith("bearer ")
+          ? authHeader.slice(7).trim()
+          : null;
+        if (!token) return new Response("Unauthorized", { status: 401 });
+
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabasePublishable = process.env.SUPABASE_PUBLISHABLE_KEY;
+        if (!supabaseUrl || !supabasePublishable) {
+          return new Response("Server not configured", { status: 500 });
+        }
+        const { createClient } = await import("@supabase/supabase-js");
+        const isNewKey = supabasePublishable.startsWith("sb_publishable_") || supabasePublishable.startsWith("sb_secret_");
+        const authClient = createClient(supabaseUrl, supabasePublishable, {
+          auth: { persistSession: false, autoRefreshToken: false },
+          global: {
+            fetch: (input, init) => {
+              const h = new Headers(init?.headers);
+              if (isNewKey && h.get("Authorization") === `Bearer ${supabasePublishable}`) h.delete("Authorization");
+              h.set("apikey", supabasePublishable);
+              return fetch(input, { ...init, headers: h });
+            },
+          },
+        });
+        const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+        if (userErr || !userData?.user) return new Response("Unauthorized", { status: 401 });
+
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        // Only staff (any row in user_roles) can use the assistant.
+        const { data: isStaff } = await supabaseAdmin.rpc("is_staff", { _uid: userData.user.id });
+        if (!isStaff) return new Response("Forbidden", { status: 403 });
+
         const { messages } = (await request.json()) as { messages: UIMessage[] };
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
-
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         const lookupCustomer = tool({
           description:
