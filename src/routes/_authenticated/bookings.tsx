@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AgeCounter } from "@/components/AgeCounter";
+import { BulkImportBookingsDialog } from "@/components/BulkImportBookingsDialog";
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   ssr: false,
@@ -86,7 +87,7 @@ function BookingsList() {
       <PageHeader
         title="Bookings"
         description="Sequential workflow: Booking → KYC → Security Deposit → Router Config → Dispatch → Activation"
-        actions={<Link to="/bookings/new"><Button><Plus className="w-4 h-4 mr-2" />New Booking</Button></Link>}
+        actions={<div className="flex gap-2"><BulkImportBookingsDialog /><Link to="/bookings/new"><Button><Plus className="w-4 h-4 mr-2" />New Booking</Button></Link></div>}
       />
       <div className="p-6 space-y-4">
         <div className="grid grid-cols-2 md:grid-cols-7 gap-3">
