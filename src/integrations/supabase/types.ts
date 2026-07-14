@@ -547,6 +547,54 @@ export type Database = {
           },
         ]
       }
+      invitations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          module_overrides: Json
+          note: string | null
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          token: string
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          module_overrides?: Json
+          note?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          token?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          module_overrides?: Json
+          note?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          token?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           channel: string
@@ -1266,6 +1314,7 @@ export type Database = {
         Args: { _booking: string; _router: string; _sim: string }
         Returns: undefined
       }
+      bulk_import_bookings: { Args: { _rows: Json }; Returns: Json }
       ensure_profile: {
         Args: { _full_name?: string }
         Returns: {
@@ -1330,6 +1379,7 @@ export type Database = {
         Returns: string
       }
       purge_row: { Args: { _id: string; _table: string }; Returns: boolean }
+      redeem_invite: { Args: { _token: string }; Returns: Json }
       refresh_customer_status: { Args: never; Returns: number }
       refresh_customer_statuses: { Args: never; Returns: number }
       restore_row: { Args: { _id: string; _table: string }; Returns: boolean }
@@ -1347,6 +1397,16 @@ export type Database = {
       soft_delete_row: {
         Args: { _id: string; _table: string }
         Returns: boolean
+      }
+      validate_invite: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          expires_at: string
+          reason: string
+          role: Database["public"]["Enums"]["app_role"]
+          valid: boolean
+        }[]
       }
     }
     Enums: {
