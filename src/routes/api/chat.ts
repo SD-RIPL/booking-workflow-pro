@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/chat")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         // Only staff (any row in user_roles) can use the assistant.
-        const { data: isStaff } = await supabaseAdmin.rpc("is_staff", { _user_id: userData.user.id });
+        const { data: isStaff } = await supabaseAdmin.rpc("is_staff", { _uid: userData.user.id });
         if (!isStaff) return new Response("Forbidden", { status: 403 });
 
         const { messages } = (await request.json()) as { messages: UIMessage[] };
