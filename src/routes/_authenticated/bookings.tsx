@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AgeCounter } from "@/components/AgeCounter";
+import { BulkImportBookingsDialog } from "@/components/BulkImportBookingsDialog";
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   ssr: false,
